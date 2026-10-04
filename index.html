@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attenda IQ - Smart Attendance System</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', system-ui, sans-serif; }
+  body {
+    background: linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+    color:#e2e8f0; min-height:100vh;
+  }
+
+  /* ---------- LOGIN PAGE ---------- */
+  #loginPage {
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:20px;
+  }
+  .login-card {
+    background:rgba(30,41,59,.9); border:1px solid rgba(148,163,184,.2);
+    border-radius:16px; padding:40px 32px; width:100%; max-width:400px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    backdrop-filter: blur(10px);
+  }
+  .logo {
+    text-align:center; margin-bottom:28px;
+  }
+  .logo-icon {
+    font-size:44px; margin-bottom:8px;
+  }
+  .logo h1 {
+    font-size:26px; background:linear-gradient(90deg,#38bdf8,#818cf8);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .logo p { color:#94a3b8; font-size:13px; margin-top:4px; }
+
+  .role-toggle {
+    display:flex; background:#0f172a; border-radius:10px;
+    padding:4px; margin-bottom:22px; border:1px solid #334155;
+  }
+  .role-toggle button {
+    flex:1; padding:10px; border:none; background:transparent;
+    color:#94a3b8; cursor:pointer; border-radius:8px;
+    font-weight:600; font-size:13px; transition:.2s;
+  }
+  .role-toggle button.active {
+    background:linear-gradient(90deg,#38bdf8,#818cf8); color:#fff;
+  }
+
+  .field { margin-bottom:16px; }
+  .field label {
+    display:block; font-size:12px; color:#94a3b8;
+    margin-bottom:6px; font-weight:600; letter-spacing:.5px;
+  }
+  .field input {
+    width:100%; padding:12px 14px; background:#0f172a;
+    border:1px solid #334155; border-radius:10px;
+    color:#e2e8f0; font-size:14px; outline:none; transition:.2s;
+  }
+  .field input:focus { border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.15); }
+
+  .btn-primary {
+    width:100%; padding:13px; background:linear-gradient(90deg,#38bdf8,#818cf8);
+    border:none; border-radius:10px; color:#fff; font-weight:700;
+    cursor:pointer; font-size:15px; margin-top:8px; transition:.2s;
+  }
+  .btn-primary:hover { opacity:.9; transform:translateY(-1px); }
+  .error {
+    color:#f87171; font-size:13px; text-align:center;
+    margin-top:14px; min-height:18px;
+  }
+  .hint {
+    text-align:center; font-size:11px; color:#64748b; margin-top:20px;
+  }
+
+  /* ---------- DASHBOARD ---------- */
+  #dashboard { display:none; padding:24px; max-width:1200px; margin:0 auto; }
+
+  .topbar {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:24px; flex-wrap:wrap; gap:12px;
+  }
+  .topbar h2 { font-size:22px; }
+  .topbar h2 span { color:#38bdf8; }
+  .user-info { display:flex; align-items:center; gap:12px; }
+  .badge {
+    background:#0f172a; border:1px solid #334155; padding:6px 12px;
+    border-radius:20px; font-size:12px; color:#94a3b8;
+  }
+  .btn-logout {
+    padding:8px 16px; background:#dc2626; border:none; border-radius:8px;
+    color:#fff; cursor:pointer; font-weight:600; font-size:13px;
+  }
+
+  .stats {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px; margin-bottom:24px;
+  }
+  .stat-card {
+    background:rgba(30,41,59,.7); border:1px solid #334155;
+    border-radius:14px; padding:20px; transition:.2s;
+  }
+  .stat-card:hover { transform:translateY(-3px); border-color:#38bdf8; }
+  .stat-card .label { font-size:12px; color:#94a3b8; font-weight:600; letter-spacing:.5px; }
+  .stat-card .value { font-size:30px; font-weight:800; margin-top:6px; color:#38bdf8; }
+  .stat-card.success .value { color:#4ade80; }
+  .stat-card.fail .value { color:#f87171; }
+
+  .panel {
+    background:rgba(30,41,59,.7); border:1px solid #334155;
+    border-radius:14px; padding:20px; overflow:hidden;
+  }
+  .panel h3 { font-size:16px; margin-bottom:16px; color:#cbd5e1; }
+
+  .filters {
+    display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;
+  }
+  .filters input, .filters select {
+    padding:9px 12px; background:#0f172a; border:1px solid #334155;
+    border-radius:8px; color:#e2e8f0; font-size:13px; outline:none;
+  }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead th {
+    text-align:left; padding:11px; color:#94a3b8; font-size:11px;
+    text-transform:uppercase; letter-spacing:.5px;
+    border-bottom:1px solid #334155;
+  }
+  tbody td {
+    padding:11px; border-bottom:1px solid rgba(51,65,85,.4);
+  }
+  tbody tr:hover { background:rgba(56,189,248,.05); }
+
+  .status-pill {
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:11px; font-weight:700;
+  }
+  .status-SUCCESS { background:rgba(74,222,128,.15); color:#4ade80; }
+  .status-FAILED  { background:rgba(248,113,113,.15); color:#f87171; }
+
+  .empty { text-align:center; padding:30px; color:#64748b; font-size:14px; }
+
+  @media(max-width:640px){
+    .topbar h2 { font-size:18px; }
+    table { font-size:12px; }
+    thead th:nth-child(3), tbody td:nth-child(3) { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================ LOGIN PAGE ================ -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <h1>Attenda IQ</h1>
+      <p>Smart Attendance System</p>
+    </div>
+
+    <div class="role-toggle">
+      <button id="btnStudent" class="active" onclick="setRole('student')">Student</button>
+      <button id="btnLecturer" onclick="setRole('lecturer')">Lecturer</button>
+    </div>
+
+    <div class="field">
+      <label id="idLabel">STUDENT ID</label>
+      <input type="text" id="username" placeholder="Enter your ID">
+    </div>
+    <div class="field">
+      <label>PASSWORD</label>
+      <input type="password" id="password" placeholder="Enter password">
+    </div>
+
+    <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    <div class="error" id="loginError"></div>
+
+    <div class="hint">
+      Demo: student 1-5 / pass123 &nbsp;•&nbsp; lecturer L001 / admin123
+    </div>
+  </div>
+</div>
+
+<!-- ================ DASHBOARD ================ -->
+<div id="dashboard">
+  <div class="topbar">
+    <h2>🎓 <span>Attenda IQ</span> Dashboard</h2>
+    <div class="user-info">
+      <span class="badge" id="userBadge">-</span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="label">TOTAL LOGS</div><div class="value" id="statTotal">0</div></div>
+    <div class="stat-card success"><div class="label">SUCCESSFUL</div><div class="value" id="statSuccess">0</div></div>
+    <div class="stat-card fail"><div class="label">FAILED</div><div class="value" id="statFail">0</div></div>
+    <div class="stat-card"><div class="label">TODAY</div><div class="value" id="statToday">0</div></div>
+  </div>
+
+  <div class="panel">
+    <h3 id="tableTitle">📋 Attendance Logs</h3>
+
+    <div class="filters">
+      <input type="text" id="searchBox" placeholder="Search by ID, UID or reason..." oninput="renderLogs()">
+      <select id="statusFilter" onchange="renderLogs()">
+        <option value="">All Status</option>
+        <option value="SUCCESS">Success</option>
+        <option value="FAILED">Failed</option>
+      </select>
+      <button class="btn-primary" style="width:auto;padding:9px 16px;" onclick="loadLogs()">🔄 Refresh</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Student ID</th>
+            <th>Card UID</th>
+            <th>Status</th>
+            <th>Reason / Method</th>
+          </tr>
+        </thead>
+        <tbody id="logsBody"></tbody>
+      </table>
+      <div class="empty" id="emptyMsg">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================== CONFIG ==================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXsuTRFCl29mUJZKPxV4cgIcAxG9quL760teaFIg0pqkhkyJwPX3F7GAejWFjHQgmq/exec"; // <-- paste your Apps Script URL
+const TOKEN      = "AttendaIQ_Secret_2024"; // must match Apps Script
+
+let currentRole = "student";
+let currentUser = null;
+let allLogs = [];
+
+// ================== ROLE TOGGLE ==================
+function setRole(role) {
+  currentRole = role;
+  document.getElementById("btnStudent").classList.toggle("active", role === "student");
+  document.getElementById("btnLecturer").classList.toggle("active", role === "lecturer");
+  document.getElementById("idLabel").textContent =
+    role === "student" ? "STUDENT ID" : "LECTURER ID";
+  document.getElementById("username").placeholder =
+    role === "student" ? "e.g. 1" : "e.g. L001";
+}
+
+// ================== LOGIN ==================
+async function doLogin() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+
+  if (!username || !password) {
+    errEl.textContent = "Please enter both ID and password.";
+    return;
+  }
+
+  errEl.textContent = "Signing in...";
+
+  try {
+    const url = `${SCRIPT_URL}?action=login&token=${TOKEN}` +
+                `&role=${encodeURIComponent(currentRole)}` +
+                `&username=${encodeURIComponent(username)}` +
+                `&password=${encodeURIComponent(password)}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.result === "success") {
+      currentUser = data.user;
+      localStorage.setItem("attendaUser", JSON.stringify(currentUser));
+      showDashboard();
+    } else {
+      errEl.textContent = data.message || "Login failed.";
+    }
+  } catch (e) {
+    errEl.textContent = "Network error. Check your connection.";
+    console.error(e);
+  }
+}
+
+// ================== DASHBOARD ==================
+function showDashboard() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+
+  document.getElementById("userBadge").textContent =
+    `${currentUser.role.toUpperCase()} • ${currentUser.name} (${currentUser.id})`;
+
+  document.getElementById("tableTitle").textContent =
+    currentUser.role === "lecturer"
+      ? "📋 All Student Attendance Logs"
+      : "📋 My Attendance Logs";
+
+  loadStats();
+  loadLogs();
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem("attendaUser");
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("password").value = "";
+}
+
+// ================== LOAD DATA ==================
+async function loadStats() {
+  try {
+    const url = `${SCRIPT_URL}?action=getStats&token=${TOKEN}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.result === "success") {
+      document.getElementById("statTotal").textContent   = data.stats.total;
+      document.getElementById("statSuccess").textContent = data.stats.success;
+      document.getElementById("statFail").textContent    = data.stats.failed;
+      document.getElementById("statToday").textContent   = data.stats.today;
+    }
+  } catch (e) { console.error(e); }
+}
+
+async function loadLogs() {
+  const emptyMsg = document.getElementById("emptyMsg");
+  emptyMsg.textContent = "Loading...";
+  emptyMsg.style.display = "block";
+
+  try {
+    const url = `${SCRIPT_URL}?action=getLogs&token=${TOKEN}` +
+                `&role=${encodeURIComponent(currentUser.role)}` +
+                `&userId=${encodeURIComponent(currentUser.id)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.result === "success") {
+      allLogs = data.logs;
+      renderLogs();
+    } else {
+      emptyMsg.textContent = "Failed to load logs.";
+    }
+  } catch (e) {
+    emptyMsg.textContent = "Network error.";
+    console.error(e);
+  }
+}
+
+// ================== RENDER ==================
+function renderLogs() {
+  const tbody = document.getElementById("logsBody");
+  const emptyMsg = document.getElementById("emptyMsg");
+
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  const status = document.getElementById("statusFilter").value.toUpperCase();
+
+  let filtered = allLogs.filter(l => {
+    const hay = `${l.studentID} ${l.cardUID} ${l.reason}`.toLowerCase();
+    const matchSearch = !search || hay.includes(search);
+    const matchStatus = !status || String(l.status).toUpperCase() === status;
+    return matchSearch && matchStatus;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = "";
+    emptyMsg.style.display = "block";
+    emptyMsg.textContent = "No records found.";
+    return;
+  }
+  emptyMsg.style.display = "none";
+
+  tbody.innerHTML = filtered.map(l => {
+    const ts = l.timestamp ? new Date(l.timestamp).toLocaleString() : "-";
+    const statusClass = `status-${String(l.status).toUpperCase()}`;
+    return `
+      <tr>
+        <td>${ts}</td>
+        <td>${l.studentID || "-"}</td>
+        <td><code>${l.cardUID || "-"}</code></td>
+        <td><span class="status-pill ${statusClass}">${l.status || "-"}</span></td>
+        <td>${l.reason || "-"}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// ================== AUTO-LOGIN ==================
+window.addEventListener("DOMContentLoaded", () => {
+  setRole("student");
+  const saved = localStorage.getItem("attendaUser");
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      showDashboard();
+    } catch(e) {}
+  }
+
+  // Allow Enter key
+  document.getElementById("password").addEventListener("keydown", e => {
+    if (e.key === "Enter") doLogin();
+  });
+});
+</script>
+</body>
+</html>
